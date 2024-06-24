@@ -4,36 +4,75 @@
       <div class="number">{{ item.number }}</div>
       <div class="timestamp">{{ item.timestamp }}</div>
     </div>
+    <div>
+      <h1>Received Messages</h1>
+      <ul>
+        <li v-for="msg in messages" :key="msg.id">{{ msg.content }}</li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
+import { io } from "socket.io-client";
+
 function getRandomTimeStamp() {
   const hours = Math.floor(Math.random() * 24)
     .toString()
-    .padStart(2, '0')
+    .padStart(2, "0");
   const minutes = Math.floor(Math.random() * 60)
     .toString()
-    .padStart(2, '0')
-  return `${hours}:${minutes}`
+    .padStart(2, "0");
+  return `${hours}:${minutes}`;
 }
 export default {
-  name: 'SquareGrid',
+  name: "SquareGrid",
   data() {
     const items = Array.from({ length: 100 }, (_, i) => ({
       number: i + 1,
       timestamp: getRandomTimeStamp()
-    }))
+    }));
     items.sort((a, b) => {
-      const timeA = a.timestamp.split(':').map(Number)
-      const timeB = b.timestamp.split(':').map(Number)
-      return timeB[0] - timeA[0] || timeB[1] - timeA[1]
-    })
+      const timeA = a.timestamp.split(":").map(Number);
+      const timeB = b.timestamp.split(":").map(Number);
+      return timeB[0] - timeA[0] || timeB[1] - timeA[1];
+    });
     return {
-      items
+      items,
+      socket: null,
+      messages: []
+    };
+  },
+  created() {
+    this.connect();
+  },
+  methods: {
+    connect() {
+      this.socket = io("http://localhost:3000", { autoConnect: true });
+
+      this.socket.on("connect", () => {
+        console.log("Socket.IO connected!");
+      });
+
+      this.socket.on("orderSaved", message => {
+        console.log("Received message:", message);
+        this.messages.push({
+          id: message.id, // Assuming message contains an id
+          content: message.content
+        });
+      });
+
+      this.socket.on("disconnect", () => {
+        console.log("Socket.IO disconnected");
+      });
+    }
+  },
+  unmounted() {
+    if (this.socket) {
+      this.socket.disconnect();
     }
   }
-}
+};
 </script>
 
 <style scoped>
