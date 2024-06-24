@@ -30,10 +30,4 @@ export class EventsGateway
   handleDisconnect(client: any) {
     console.log(`Client disconnected: ${client.id}`);
   }
-
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: string): void {
-    console.log('Received message: ', data);
-    this.server.emit('events', data);
-  }
 }

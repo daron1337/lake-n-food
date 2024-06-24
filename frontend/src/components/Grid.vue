@@ -1,44 +1,22 @@
 <template>
   <div class="grid-container">
-    <div v-for="item in items" :key="item.number" class="square">
-      <div class="number">{{ item.number }}</div>
-      <div class="timestamp">{{ item.timestamp }}</div>
-    </div>
-    <div>
-      <h1>Received Messages</h1>
-      <ul>
-        <li v-for="msg in messages" :key="msg.id">{{ msg.content }}</li>
-      </ul>
+    <div v-for="order in orders" :key="order.id" class="square">
+      <div class="number">{{ order.number }}</div>
+      <div class="timestamp">{{ formatTime(order.createdAtRome) }}</div>
     </div>
   </div>
 </template>
 
 <script>
 import { io } from "socket.io-client";
+const serverUrl = import.meta.env.VITE_SERVER_URL;
+import axios from "axios";
 
-function getRandomTimeStamp() {
-  const hours = Math.floor(Math.random() * 24)
-    .toString()
-    .padStart(2, "0");
-  const minutes = Math.floor(Math.random() * 60)
-    .toString()
-    .padStart(2, "0");
-  return `${hours}:${minutes}`;
-}
 export default {
   name: "SquareGrid",
   data() {
-    const items = Array.from({ length: 100 }, (_, i) => ({
-      number: i + 1,
-      timestamp: getRandomTimeStamp()
-    }));
-    items.sort((a, b) => {
-      const timeA = a.timestamp.split(":").map(Number);
-      const timeB = b.timestamp.split(":").map(Number);
-      return timeB[0] - timeA[0] || timeB[1] - timeA[1];
-    });
     return {
-      items,
+      orders: [],
       socket: null,
       messages: []
     };
@@ -46,9 +24,28 @@ export default {
   created() {
     this.connect();
   },
+  mounted() {
+    this.fetchOrders();
+  },
   methods: {
+    fetchOrders() {
+      axios
+        .get(`${serverUrl}/orders`)
+        .then(response => {
+          this.orders = response.data;
+          console.log(this.orders);
+        })
+        .catch(error => console.error("Error fetching orders:", error));
+    },
+    formatTime(dateTime) {
+      const date = new Date(dateTime);
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    },
     connect() {
-      this.socket = io("http://localhost:3000", { autoConnect: true });
+      this.socket = io(`${serverUrl}`, { autoConnect: true });
 
       this.socket.on("connect", () => {
         console.log("Socket.IO connected!");
@@ -56,10 +53,10 @@ export default {
 
       this.socket.on("orderSaved", message => {
         console.log("Received message:", message);
-        this.messages.push({
-          id: message.id, // Assuming message contains an id
-          content: message.content
-        });
+        this.orders.push(message);
+        this.orders.sort(
+          (a, b) => new Date(b.createdAtRome) - new Date(a.createdAtRome)
+        ); // Re-sort orders after adding new one
       });
 
       this.socket.on("disconnect", () => {

@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
 } from 'typeorm';
+import * as moment from 'moment-timezone';
 
 @Entity()
 export class Order {
@@ -15,4 +16,8 @@ export class Order {
 
   @CreateDateColumn()
   createdAt: Date;
+  // Getter to return the createdAt in Rome timezone
+  get createdAtRome(): string {
+    return moment(this.createdAt).tz('Europe/Rome').format();
+  }
 }
