@@ -18,4 +18,7 @@ export class OrdersService {
   async findAllOrders(): Promise<Order[]> {
     return this.ordersRepository.find();
   }
+  async clearOrders(): Promise<void> {
+    await this.ordersRepository.clear();
+  }
 }

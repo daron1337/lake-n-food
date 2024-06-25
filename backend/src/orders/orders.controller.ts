@@ -1,10 +1,10 @@
-import { Controller, Get, Post, HttpCode, Body } from '@nestjs/common';
+import { Controller, Get, Post, Delete, HttpCode, Body } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from './orders.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { create } from 'domain';
+import { OrdersService } from './orders.service';
 
 @Controller('orders')
 export class OrdersController {
@@ -12,6 +12,7 @@ export class OrdersController {
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
     private eventsGateway: EventsGateway,
+    private readonly ordersService: OrdersService,
   ) {}
 
   @Post()
@@ -45,5 +46,11 @@ export class OrdersController {
       createdAtRome: order.createdAtRome, // Use the getter to format
       createdAt: order.createdAt, // Add the missing createdAt property
     }));
+  }
+  @Delete()
+  @HttpCode(204)
+  async clearOrders(): Promise<void> {
+    await this.ordersService.clearOrders();
+    this.eventsGateway.server.emit('ordersCleared');
   }
 }

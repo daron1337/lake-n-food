@@ -1,25 +1,14 @@
 <template>
   <div class="number-input-form">
-    <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="numberInput">Enter a Number</label>
-        <input
-          type="number"
-          id="numberInput"
-          v-model="number"
-          class="number-input"
-          placeholder="Enter number here"
-        />
-      </div>
-      <button type="submit">Submit</button>
-      <!-- Message Display -->
-      <div
-        v-if="message"
-        :class="{ 'success-message': success, 'error-message': !success }"
-      >
-        {{ message }}
-      </div>
-    </form>
+    <div class="number-log">{{ numberLog }}</div>
+    <number-pad @submit="submitForm" @update="updateLog"></number-pad>
+    <!-- Message Display -->
+    <div
+      v-if="message"
+      :class="{ 'success-message': success, 'error-message': !success }"
+    >
+      {{ message }}
+    </div>
     <!-- Delete Button -->
     <button @click="confirmDelete" class="delete-button">
       Delete All Orders
@@ -29,19 +18,24 @@
 
 <script>
 import axios from "axios";
+import NumberPad from "./NumberPad.vue"; // Import the NumberPad component
 
 export default {
+  components: {
+    NumberPad
+  },
   data() {
     return {
-      number: null,
+      numberLog: "",
       message: "",
       success: false
     };
   },
   methods: {
-    submitForm() {
+    submitForm(submittedNumber) {
+      if (submittedNumber === "") return;
+
       const serverUrl = import.meta.env.VITE_SERVER_URL;
-      const submittedNumber = this.number; // Store the submitted number
       axios
         .post(`${serverUrl}/orders`, {
           number: submittedNumber
@@ -49,20 +43,23 @@ export default {
         .then(response => {
           this.message = `Number ${submittedNumber} submitted successfully!`;
           this.success = true;
-          this.resetForm(); // Reset the form on success
+          this.clearLog(); // Clear the log on success
           console.log(`Submitted number: ${submittedNumber}`); // Log the submitted number
         })
         .catch(error => {
           this.message = `Failed to submit number ${submittedNumber}. Error: ${error.message}`;
           this.success = false;
-          this.resetForm(); // Reset the form on error
+          this.clearLog(); // Clear the log on error
           console.error(
             `Error submitting number: ${submittedNumber}. Error: ${error.message}`
           ); // Log the error and number
         });
     },
-    resetForm() {
-      this.number = null;
+    updateLog(currentInput) {
+      this.numberLog = currentInput;
+    },
+    clearLog() {
+      this.numberLog = "";
     },
     confirmDelete() {
       if (confirm("Are you sure you want to delete all orders?")) {
@@ -99,14 +96,10 @@ export default {
   padding: 20px; /* Add padding if needed */
 }
 
-.form-group {
+.number-log {
+  font-size: 48px;
+  color: white;
   margin-bottom: 20px;
-}
-
-.number-input {
-  padding: 10px;
-  font-size: 16px;
-  width: 100%;
 }
 
 button {
