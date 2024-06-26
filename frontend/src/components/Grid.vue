@@ -1,19 +1,30 @@
 <template>
-  <div class="scroll-container">
-    <div class="grid-container">
-      <div
-        v-for="order in orders"
-        :key="order.id"
-        :class="{ square: true, 'new-order': order.isNew }"
-      >
-        <div class="number">{{ order.number }}</div>
-        <div class="timestamp">{{ formatTime(order.createdAtRome) }}</div>
+  <div class="page-container">
+    <header class="page-header">
+      <h1 class="header-message">
+        Controlla il tuo ordine anche da cellulare alla pagina
+        lakenroll.by.dvisionlab.it o scannerizza il QR CODE
+      </h1>
+    </header>
+    <div class="scroll-container">
+      <div class="grid-container">
+        <div class="square qr-square">
+          <img src="@/assets/lakenroll_qr.png" alt="QR Code" class="qr-code" />
+        </div>
+        <div
+          v-for="order in orders"
+          :key="order.id"
+          :class="{ square: true, 'new-order': order.isNew }"
+        >
+          <div class="number">{{ order.number }}</div>
+          <div class="timestamp">{{ formatTime(order.createdAtRome) }}</div>
+        </div>
       </div>
+      <footer class="footer">
+        Made with <span class="heart">❤</span> by
+        <a href="http://www.dvisionlab.it" target="_blank">D/Vision Lab</a>
+      </footer>
     </div>
-    <footer class="footer">
-      Made with <span class="heart">❤</span> by
-      <a href="http://www.dvisionlab.it" target="_blank">D/Vision Lab</a>
-    </footer>
   </div>
 </template>
 
@@ -111,7 +122,49 @@ export default {
 }
 
 .new-order {
-  animation: new-order 2s ease-out; /* Increased duration to 2 seconds */
+  animation: new-order 5s ease-out; /* Increased duration to 5 seconds */
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #181818; /* Dark background for contrast */
+}
+
+.page-header {
+  width: 100%;
+  padding: 20px;
+  background-color: #282c34;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header-message {
+  color: #fff;
+  font-size: 36px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-square {
+  background-color: #fff; /* Optional: Different background color for QR code */
+}
+
+.qr-code {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .scroll-container {
@@ -184,6 +237,7 @@ export default {
   bottom: 0;
   width: 100%;
   background-color: #181818;
+  color: white;
 }
 
 .footer .heart {

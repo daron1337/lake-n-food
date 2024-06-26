@@ -1,6 +1,6 @@
 <template>
   <div class="number-input-form">
-    <div class="number-log">{{ numberLog }}</div>
+    <div class="number-log">Ordine n: {{ numberLog }}</div>
     <number-pad @submit="submitForm" @update="updateLog"></number-pad>
     <!-- Message Display -->
     <div
@@ -98,7 +98,7 @@ export default {
 
 .number-log {
   font-size: 48px;
-  color: white;
+  color: red;
   margin-bottom: 20px;
 }
 
