@@ -3,7 +3,7 @@
     <header class="page-header">
       <h1 class="header-message">
         Controlla il tuo ordine anche da cellulare alla pagina
-        lakenroll.by.dvisionlab.it o scannerizza il QR CODE
+        https://lakenroll.by.dvisionlab.it o scannerizza il QR CODE
       </h1>
     </header>
     <div class="scroll-container">
@@ -210,6 +210,10 @@ export default {
 
 /* Media query for smaller screens */
 @media (max-width: 600px) {
+  .page-header {
+    display: none; /* Hide header on mobile devices */
+  }
+
   .grid-container {
     grid-template-columns: repeat(auto-fill, 100px); /* Smaller column size */
     gap: 10px; /* Smaller gap */

@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { Order } from './orders.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { OrdersService } from './orders.service';
 
 @Controller('orders')
 export class OrdersController {
@@ -12,7 +11,6 @@ export class OrdersController {
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
     private eventsGateway: EventsGateway,
-    private readonly ordersService: OrdersService,
   ) {}
 
   @Post()
@@ -50,7 +48,7 @@ export class OrdersController {
   @Delete()
   @HttpCode(204)
   async clearOrders(): Promise<void> {
-    await this.ordersService.clearOrders();
+    await this.ordersRepository.clear();
     this.eventsGateway.server.emit('ordersCleared');
   }
 }
