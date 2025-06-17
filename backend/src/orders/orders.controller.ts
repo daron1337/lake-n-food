@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Order } from './orders.entity';
 import { EventsGateway } from '../events/events.gateway';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { PushService } from 'src/push/push.service';
 
 @Controller('orders')
 export class OrdersController {
@@ -11,6 +12,7 @@ export class OrdersController {
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
     private eventsGateway: EventsGateway,
+    private pushService: PushService,
   ) {}
 
   @Post()
@@ -27,6 +29,20 @@ export class OrdersController {
       createdAtRome: order.createdAtRome, // Using the getter to format the timestamp
     };
     this.eventsGateway.server.emit('orderSaved', orderData); // Emit event after saving
+
+    // Prepara il payload della notifica push
+    const payload = {
+      number: order.number,
+      message: `Il tuo numero ${order.number} è arrivato!`,
+    };
+
+    // Recupera le sottoscrizioni (in produzione queste dovrebbero essere salvate in un database)
+    //const subscriptions = await this.subscriptionsService.getAllSubscriptions(); //TODO
+    const subscriptions = [];
+    subscriptions.forEach((subscription) => {
+      this.pushService.sendNotification(subscription, payload);
+    });
+
     return savedOrder;
   }
 

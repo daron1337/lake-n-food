@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Order } from './orders/orders.entity';
 import { OrdersModule } from './orders/orders.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -14,6 +16,8 @@ import { OrdersModule } from './orders/orders.module';
       synchronize: true,
     }),
     OrdersModule,
+    PushModule,
+    SubscriptionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -6,6 +6,15 @@
         https://lakenroll.by.dvisionlab.it o scannerizza il QR CODE
       </h1>
     </header>
+    <div class="number-selector">
+      <input v-model="newNumber" placeholder="Inserisci numero" />
+      <button @click="addNumber">Aggiungi</button>
+    </div>
+    <div class="selected-numbers">
+      <span v-for="num in selectedNumbers" :key="num">
+        {{ num }} <button @click="removeNumber(num)">X</button>
+      </span>
+    </div>
     <div class="scroll-container">
       <div class="grid-container">
         <div class="square qr-square">
@@ -39,16 +48,81 @@ export default {
     return {
       orders: [],
       socket: null,
-      messages: []
+      messages: [],
+      selectedNumbers:
+        JSON.parse(localStorage.getItem("selectedNumbers")) || [],
+      newNumber: ""
     };
   },
   created() {
+    // Richiedi permesso notifiche al caricamento
+    if ("Notification" in window && Notification.permission !== "granted") {
+      Notification.requestPermission().then(permission => {
+        console.log("Permesso notifiche:", permission);
+      });
+    }
     this.connect();
   },
   mounted() {
     this.fetchOrders();
   },
   methods: {
+    addNumber() {
+      const num = this.newNumber.trim();
+      if (num && !this.selectedNumbers.includes(num)) {
+        this.selectedNumbers.push(num);
+        localStorage.setItem(
+          "selectedNumbers",
+          JSON.stringify(this.selectedNumbers)
+        );
+        this.newNumber = "";
+      }
+    },
+    removeNumber(num) {
+      this.selectedNumbers = this.selectedNumbers.filter(n => n !== num);
+      localStorage.setItem(
+        "selectedNumbers",
+        JSON.stringify(this.selectedNumbers)
+      );
+    },
+    handleNewOrder(message) {
+      const newOrder = { ...message, isNew: true };
+      this.orders.push(newOrder);
+      this.orders.sort(
+        (a, b) => new Date(b.createdAtRome) - new Date(a.createdAtRome)
+      );
+
+      // Controlla se il numero è in quelli selezionati
+      if (this.selectedNumbers.includes(String(newOrder.number))) {
+        // Se le notifiche sono autorizzate
+        if ("Notification" in window && Notification.permission === "granted") {
+          const notification = new Notification(
+            `Il tuo numero ${newOrder.number} è arrivato!`,
+            {
+              requireInteraction: true // Resta visibile finché l'utente non interagisce
+            }
+          );
+          notification.onclick = () => {
+            // Quando l'utente conferma, rimuove il numero dalla lista
+            this.removeNumber(String(newOrder.number));
+            console.log("fooasd");
+            notification.close();
+          };
+        } else {
+          // Fallback: utilizza un alert di conferma
+          if (
+            confirm(
+              `Il tuo numero ${newOrder.number} è arrivato! Premi OK per confermare.`
+            )
+          ) {
+            this.removeNumber(String(newOrder.number));
+          }
+        }
+      }
+      setTimeout(() => {
+        newOrder.isNew = false;
+      }, 500);
+    },
     fetchOrders() {
       axios
         .get(`${serverUrl}/orders`)
@@ -74,16 +148,7 @@ export default {
 
       this.socket.on("orderSaved", message => {
         console.log("Received message:", message);
-        const newOrder = { ...message, isNew: true };
-        this.orders.push(newOrder);
-        this.orders.sort(
-          (a, b) => new Date(b.createdAtRome) - new Date(a.createdAtRome)
-        ); // Re-sort orders after adding new one
-
-        // Remove the isNew flag after the animation ends
-        setTimeout(() => {
-          newOrder.isNew = false;
-        }, 500); // Duration of the animation
+        this.handleNewOrder(message);
       });
 
       this.socket.on("ordersCleared", () => {
