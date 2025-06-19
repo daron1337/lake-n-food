@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
+// @ts-ignore
+const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker
@@ -30,7 +32,7 @@ async function subscribeUserToPush(registration: ServiceWorkerRegistration) {
     console.log("Sottoscrizione ottenuta:", subscription);
 
     // Invia la sottoscrizione al backend (usa axios, fetch o altro)
-    await fetch("http://localhost:3000/subscriptions", {
+    await fetch(`${serverUrl}/subscriptions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

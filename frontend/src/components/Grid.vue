@@ -3,7 +3,7 @@
     <header class="page-header">
       <h1 class="header-message">
         Controlla il tuo ordine anche da cellulare alla pagina
-        https://lakenroll.by.dvisionlab.it o scannerizza il QR CODE
+        https://lakenroll.dvisionlab.it o scannerizza il QR CODE
       </h1>
     </header>
     <div class="number-selector">
@@ -267,6 +267,10 @@ export default {
 
 .number {
   font-size: 3em; /* Default font size for the number */
+}
+
+.selected-numbers {
+  color: white;
 }
 
 .timestamp {
