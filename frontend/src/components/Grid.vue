@@ -1,11 +1,6 @@
 <template>
   <div class="page-container">
-    <header class="page-header">
-      <h1 class="header-message">
-        Controlla il tuo ordine anche da cellulare alla pagina
-        https://lakenroll.dvisionlab.it o scannerizza il QR CODE
-      </h1>
-    </header>
+    <header class="page-header"></header>
     <div class="number-selector">
       <input v-model="newNumber" placeholder="Inserisci numero" />
       <button @click="addNumber">Aggiungi</button>
